@@ -139,44 +139,18 @@ describe('CommunityPage', () => {
     });
   });
 
-  it('renders tab buttons for Global and Friends', async () => {
-    mockList.mockResolvedValue({ data: [mockChallenge], error: null });
-    wrap();
-    await waitFor(() => screen.getByRole('heading', { name: /leaderboard/i }));
-    // Leaderboard tab buttons are plain buttons not role="tab"
-    const buttons = screen.getAllByRole('button');
-    const labels  = buttons.map((b) => b.textContent?.toLowerCase());
-    expect(labels.some((l) => l?.includes('global'))).toBe(true);
-    expect(labels.some((l) => l?.includes('friends'))).toBe(true);
-  });
-
-  it('Friends tab shows context note', async () => {
+  it('renders leaderboard entries from the API', async () => {
     mockList.mockResolvedValue({ data: [mockChallenge], error: null });
     mockLeaderboard.mockResolvedValue({
       data: { leaderboard: [
         { user_id: 1, first_name: 'Alice', score_kg: '50', rank: 1 },
-      ], myRank: null },
+      ], myRank: 1 },
       error: null,
     });
     wrap();
-    // Wait for leaderboard to load first
     await waitFor(() => screen.getByRole('heading', { name: /leaderboard/i }));
-    // Find and click Friends button
-    const friendsBtn = screen.getAllByRole('button').find(
-      (b) => b.textContent?.trim() === 'Friends'
-    );
-    expect(friendsBtn).toBeDefined();
-    fireEvent.click(friendsBtn);
     await waitFor(() => {
-      expect(screen.getByText(/Showing top participants/i)).toBeInTheDocument();
-    });
-  });
-
-  it('renders badges section', async () => {
-    mockList.mockResolvedValue({ data: [], error: null });
-    wrap();
-    await waitFor(() => {
-      expect(screen.getByRole('heading', { name: /your badges/i })).toBeInTheDocument();
+      expect(screen.getByText('Alice')).toBeInTheDocument();
     });
   });
 });

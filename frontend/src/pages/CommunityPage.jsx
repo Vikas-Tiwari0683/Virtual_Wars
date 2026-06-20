@@ -4,34 +4,15 @@
 // Leaderboard loads from challengesAPI.leaderboard(id).
 // =============================================================================
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import DashboardShell    from '../components/layout/DashboardShell';
 import MaterialIcon      from '../components/atoms/MaterialIcon';
 import Badge             from '../components/atoms/Badge';
-import Button            from '../components/atoms/Button';
 import { challengesAPI } from '../services/api';
 
 // =============================================================================
-// SECTION: Static data (feed + badges — no backend endpoint for these)
+// SECTION: Static display config (visual styling only — not data)
 // =============================================================================
-const FEED = [
-  { id: 1, avatar: 'M', name: 'Marcus T.',  action: 'logged a 15 km bike ride',        icon: 'pedal_bike',   time: '2h ago',  points: 'Saved 0 kg' },
-  { id: 2, avatar: 'P', name: 'Priya S.',   action: 'completed goal: Meatless Week',    icon: 'check_circle', time: '5h ago',  points: 'Badge earned 🏆' },
-  { id: 3, avatar: 'L', name: 'Leila K.',   action: 'joined the June Carbon Challenge', icon: 'group',        time: '1d ago',  points: 'Welcome!' },
-  { id: 4, avatar: 'J', name: 'James O.',   action: 'reduced energy by 18% this week',  icon: 'bolt',         time: '1d ago',  points: 'Saved 8.4 kg' },
-  { id: 5, avatar: 'S', name: 'Sara H.',    action: 'set a new 30-day goal',            icon: 'flag',         time: '2d ago',  points: 'Good luck!' },
-];
-
-const BADGES = [
-  { icon: 'local_fire_department', label: '14-Day Streak',    fill: 1, earned: true,  color: '#f97316' },
-  { icon: 'eco',                   label: 'First Log',         fill: 1, earned: true,  color: '#006b2c' },
-  { icon: 'emoji_events',          label: 'Goal Crusher',      fill: 1, earned: true,  color: '#d97706' },
-  { icon: 'restaurant',            label: 'Meat-Free Week',    fill: 1, earned: true,  color: '#f97316' },
-  { icon: 'public',                label: 'Carbon Neutral Mo', fill: 0, earned: false, color: '#bdcaba', hint: 'Log 0 net emissions for a month' },
-  { icon: 'directions_run',        label: 'Marathon Saver',    fill: 0, earned: false, color: '#bdcaba', hint: 'Save 100 kg in one month' },
-  { icon: 'recycling',             label: 'Full Circle',       fill: 0, earned: false, color: '#bdcaba', hint: 'Log all 5 categories in one day' },
-];
-
 const CARD_GRADIENTS = [
   'from-[#006b2c] to-[#2e6a41]',
   'from-[#f97316] to-[#ea580c]',
@@ -130,7 +111,6 @@ function ChallengeCard({ challenge, idx, onJoined }) {
 // SECTION: Leaderboard — real data from challengesAPI.leaderboard()
 // =============================================================================
 function Leaderboard({ challenges }) {
-  const [tab,         setTab]         = useState('Global');
   const [leaderboard, setLeaderboard] = useState([]);
   const [myRank,      setMyRank]      = useState(null);
   const [loading,     setLoading]     = useState(false);
@@ -150,27 +130,15 @@ function Leaderboard({ challenges }) {
     });
   }, [targetId]);  // ← stable primitive ID, not object reference
 
-  const podium = leaderboard.slice(0, 3);
-  // Friends tab shows only top 5 — in production this would filter by friend list
-  // For now it shows a subset with a note that it requires social connections
-  const displayList = tab === 'Friends'
-    ? leaderboard.slice(0, 5)
-    : leaderboard;
-  const rest = displayList.slice(3);
+  // Podium only renders with a full top-3; otherwise show everyone in the list
+  const hasPodium = leaderboard.length >= 3;
+  const podium    = hasPodium ? leaderboard.slice(0, 3) : [];
+  const rest      = hasPodium ? leaderboard.slice(3) : leaderboard;
 
   return (
     <div className="bg-white rounded-2xl shadow-sm border border-[#bdcaba]/30 p-6">
       <div className="flex items-center justify-between mb-5">
         <h3 className="text-lg font-bold text-[#141b2b]">Leaderboard</h3>
-        <div className="flex gap-1 bg-[#f1f3ff] p-1 rounded-xl">
-          {['Global', 'Friends'].map((t) => (
-            <button key={t} onClick={() => setTab(t)}
-              className={`px-3 py-1 rounded-lg text-[11px] font-bold uppercase transition-all ${
-                tab === t ? 'bg-white text-[#006b2c] shadow-sm' : 'text-[#3e4a3d] hover:bg-[#e1e8fd]'}`}>
-              {t}
-            </button>
-          ))}
-        </div>
       </div>
 
       {loading ? (
@@ -184,13 +152,8 @@ function Leaderboard({ challenges }) {
         </div>
       ) : (
         <>
-          {tab === 'Friends' && (
-            <p className="text-[11px] text-[#6e7b6c] mb-3 italic">
-              Showing top participants. Friend connections coming in a future update.
-            </p>
-          )}
           {/* Podium — top 3 */}
-          {podium.length >= 3 && (
+          {hasPodium && (
             <div className="flex items-end justify-center gap-4 mb-6">
               {[podium[1], podium[0], podium[2]].map((entry, i) => {
                 const heights = ['h-16', 'h-24', 'h-12'];
@@ -241,77 +204,6 @@ function Leaderboard({ challenges }) {
 }
 
 // =============================================================================
-// SECTION: ActivityFeed — static (no backend endpoint)
-// =============================================================================
-function ActivityFeed() {
-  const [liked, setLiked] = useState([]);
-  return (
-    <div className="bg-white rounded-2xl shadow-sm border border-[#bdcaba]/30 p-6">
-      <h3 className="text-lg font-bold text-[#141b2b] mb-5">Friends' Activity</h3>
-      <ul className="space-y-4" role="list">
-        {FEED.map((item) => (
-          <li key={item.id} className="flex items-start gap-3" role="listitem">
-            <div className="w-9 h-9 rounded-full flex items-center justify-center text-white text-sm font-bold flex-shrink-0"
-              style={{ background: avatarColor(item.avatar) }}>{item.avatar}</div>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm text-[#141b2b]">
-                <span className="font-bold">{item.name}</span>{' '}
-                <span className="text-[#3e4a3d]">{item.action}</span>
-              </p>
-              <div className="flex items-center gap-3 mt-1">
-                <span className="text-[11px] text-[#6e7b6c]">{item.time}</span>
-                <span className="text-[11px] font-semibold text-[#006b2c]">{item.points}</span>
-              </div>
-            </div>
-            <button
-              onClick={() => setLiked((prev) => prev.includes(item.id) ? prev.filter((i) => i !== item.id) : [...prev, item.id])}
-              className={`flex items-center gap-1 text-[11px] font-bold px-2 py-1 rounded-lg transition-colors ${
-                liked.includes(item.id) ? 'bg-[#f0fdf4] text-[#006b2c]' : 'text-[#6e7b6c] hover:bg-[#f1f3ff]'}`}
-              aria-label={liked.includes(item.id) ? 'Unlike' : 'Like'}
-              aria-pressed={liked.includes(item.id)}>
-              <MaterialIcon name="thumb_up" fill={liked.includes(item.id) ? 1 : 0} className="text-sm" />
-              Nice!
-            </button>
-          </li>
-        ))}
-      </ul>
-    </div>
-  );
-}
-
-// =============================================================================
-// SECTION: BadgesRow — static
-// =============================================================================
-function BadgesRow() {
-  const [hovered, setHovered] = useState(null);
-  return (
-    <div className="bg-white rounded-2xl shadow-sm border border-[#bdcaba]/30 p-6">
-      <h3 className="text-lg font-bold text-[#141b2b] mb-4">Your Badges</h3>
-      <div className="flex gap-4 overflow-x-auto pb-2" role="list">
-        {BADGES.map((b) => (
-          <div key={b.label} className="flex-shrink-0 flex flex-col items-center relative" role="listitem">
-            <button
-              onMouseEnter={() => setHovered(b.label)} onMouseLeave={() => setHovered(null)}
-              onFocus={() => setHovered(b.label)} onBlur={() => setHovered(null)}
-              aria-label={b.earned ? `Badge: ${b.label}` : `Locked: ${b.label}. ${b.hint}`}
-              className={`w-16 h-16 rounded-2xl flex items-center justify-center transition-all ${
-                b.earned ? 'bg-[#f0fdf4] hover:scale-110 shadow-md' : 'bg-[#f1f3ff] opacity-40 cursor-not-allowed'}`}>
-              <MaterialIcon name={b.icon} fill={b.fill} className="text-3xl" style={{ color: b.color }} />
-            </button>
-            {!b.earned && hovered === b.label && (
-              <div className="absolute bottom-full mb-2 w-36 bg-[#293040] text-white text-[10px] p-2 rounded-lg z-10 text-center shadow-xl pointer-events-none">
-                {b.hint}
-              </div>
-            )}
-            <p className="text-[10px] font-semibold text-[#3e4a3d] mt-2 text-center leading-tight max-w-[64px]">{b.label}</p>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-// =============================================================================
 // SECTION: CommunityPage — Default Export
 // =============================================================================
 export default function CommunityPage() {
@@ -338,9 +230,6 @@ export default function CommunityPage() {
           <h1 className="text-3xl font-bold text-[#141b2b]">Community</h1>
           <p className="text-sm text-[#3e4a3d] mt-1">Climate action is better together.</p>
         </div>
-        <Button variant="secondary">
-          <MaterialIcon name="share" className="text-lg" />Invite Friends
-        </Button>
       </div>
 
       {error && (
@@ -377,13 +266,8 @@ export default function CommunityPage() {
         </div>
       )}
 
-      {/* Leaderboard + Feed */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-8">
-        <div className="lg:col-span-7"><Leaderboard challenges={challenges} /></div>
-        <div className="lg:col-span-5"><ActivityFeed /></div>
-      </div>
-
-      <BadgesRow />
+      {/* Leaderboard */}
+      <Leaderboard challenges={challenges} />
     </DashboardShell>
   );
 }
