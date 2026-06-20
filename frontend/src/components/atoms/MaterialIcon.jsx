@@ -6,6 +6,8 @@
 // style strings everywhere.
 // =============================================================================
 
+import PropTypes from 'prop-types';
+
 /**
  * @param {string}  name    – Material Symbol name, e.g. "eco", "dashboard"
  * @param {0|1}     fill    – 0 = outlined (default), 1 = filled
@@ -23,3 +25,10 @@ export default function MaterialIcon({ name, fill = 0, weight = 400, className =
     </span>
   );
 }
+
+MaterialIcon.propTypes = {
+  name:      PropTypes.string.isRequired,
+  fill:      PropTypes.oneOf([0, 1]),
+  weight:    PropTypes.number,
+  className: PropTypes.string,
+};

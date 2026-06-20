@@ -9,6 +9,7 @@
 
 import Sidebar from './Sidebar';
 import MobileBottomNav from './MobileBottomNav';
+import PropTypes from 'prop-types';
 
 export default function DashboardShell({ children }) {
   return (
@@ -33,3 +34,7 @@ export default function DashboardShell({ children }) {
     </div>
   );
 }
+
+DashboardShell.propTypes = {
+  children: PropTypes.node,
+};

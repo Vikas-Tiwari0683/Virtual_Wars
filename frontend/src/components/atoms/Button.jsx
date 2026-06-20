@@ -5,6 +5,8 @@
 // All variants meet WCAG 2.1 AA contrast and include focus-visible ring.
 // =============================================================================
 
+import PropTypes from 'prop-types';
+
 const VARIANT_CLASSES = {
   primary:
     'bg-[#006b2c] text-white hover:bg-[#00873a] active:scale-[0.98] shadow-sm',
@@ -46,3 +48,13 @@ export default function Button({
     </button>
   );
 }
+
+Button.propTypes = {
+  children:  PropTypes.node,
+  variant:   PropTypes.oneOf(['primary', 'secondary', 'ghost', 'destructive']),
+  className: PropTypes.string,
+  fullWidth: PropTypes.bool,
+  disabled:  PropTypes.bool,
+  type:      PropTypes.oneOf(['button', 'submit', 'reset']),
+  onClick:   PropTypes.func,
+};

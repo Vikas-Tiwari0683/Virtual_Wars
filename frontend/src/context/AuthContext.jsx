@@ -7,7 +7,7 @@
 // =============================================================================
 
 import { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { auth } from '../services/firebase/config';
+import PropTypes from 'prop-types';
 import {
   signUpWithEmail,
   signInWithEmail,
@@ -125,3 +125,7 @@ export function useAuth() {
   if (!ctx) throw new Error('useAuth must be used within <AuthProvider>');
   return ctx;
 }
+
+AuthProvider.propTypes = {
+  children: PropTypes.node,
+};

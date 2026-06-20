@@ -3,6 +3,8 @@
 // Small pill label used for carbon status, category tags, and savings chips.
 // =============================================================================
 
+import PropTypes from 'prop-types';
+
 /**
  * @param {'green'|'amber'|'red'|'default'} variant
  * @param {string} className – extra Tailwind classes
@@ -25,3 +27,9 @@ export default function Badge({ children, variant = 'default', className = '' })
     </span>
   );
 }
+
+Badge.propTypes = {
+  children:  PropTypes.node,
+  variant:   PropTypes.oneOf(['green', 'amber', 'red', 'default']),
+  className: PropTypes.string,
+};

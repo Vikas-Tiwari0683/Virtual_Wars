@@ -4,6 +4,8 @@
 // Design spec: Gray 100 bg, 8px radius, green focus ring on active.
 // =============================================================================
 
+import PropTypes from 'prop-types';
+
 export default function InputField({
   id,
   label,
@@ -71,3 +73,16 @@ export default function InputField({
     </div>
   );
 }
+
+InputField.propTypes = {
+  id:          PropTypes.string,
+  label:       PropTypes.string,
+  type:        PropTypes.string,
+  placeholder: PropTypes.string,
+  value:       PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+  onChange:    PropTypes.func,
+  error:       PropTypes.string,
+  icon:        PropTypes.elementType,
+  className:   PropTypes.string,
+  required:    PropTypes.bool,
+};
