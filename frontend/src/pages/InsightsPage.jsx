@@ -34,12 +34,11 @@ const OPPORTUNITIES = [
   { icon: 'wb_sunny',       category: 'Energy',    action: 'Install solar on your hot water system',   saving: 28, pct: 8,  difficulty: 'Hard' },
 ];
 
-// Stable heatmap — generated once, not on every render
-const HEATMAP_DATA = Array.from({ length: 12 }, () =>
-  Array.from({ length: 7 }, () => {
-    const r = Math.random();
-    return r < 0.15 ? 0 : r < 0.45 ? 1 : r < 0.7 ? 2 : r < 0.9 ? 3 : 4;
-  })
+// Deterministic display heatmap — fixed pseudo-pattern so the visual is stable
+// across renders and contains no randomness (this is illustrative UI data only,
+// not security-sensitive). A small deterministic hash spreads values 0–4.
+const HEATMAP_DATA = Array.from({ length: 12 }, (_, week) =>
+  Array.from({ length: 7 }, (_, day) => ((week * 7 + day) * 7 + 3) % 5)
 );
 
 // =============================================================================

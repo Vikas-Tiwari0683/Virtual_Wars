@@ -13,6 +13,7 @@ node_modules
 dist
 dist-ssr
 *.local
+.env
 
 # Production env file — contains real API keys, never commit
 .env.production

@@ -1,8 +1,8 @@
 // =============================================================================
 // SECTION: Database Pool
 // Creates a single pg Pool instance using the Neon connection string from .env.
-// SSL is required by Neon — rejectUnauthorized:false is safe for Neon's
-// managed TLS certs.
+// SSL is always enabled with full certificate-chain verification — Neon's
+// managed TLS certificates validate correctly against the public CA bundle.
 // All other modules import { pool } from here — never create their own Pool.
 // =============================================================================
 
@@ -13,11 +13,8 @@ require('dotenv').config();
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
-  // Neon requires SSL. In production we validate the cert chain; in local dev
-  // we relax it because some local proxies use self-signed certs.
-  ssl: process.env.NODE_ENV === 'production'
-    ? { rejectUnauthorized: true }
-    : { rejectUnauthorized: false },
+  // Enforce TLS with certificate-chain verification (no downgrade).
+  ssl: { rejectUnauthorized: true },
   // Connection pool sizing
   max: 10,          // max simultaneous clients
   idleTimeoutMillis: 30000,
