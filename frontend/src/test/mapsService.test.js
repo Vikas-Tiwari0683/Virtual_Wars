@@ -4,7 +4,7 @@
 // and error handling. fetch is mocked; no real network calls.
 // =============================================================================
 
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, vi, afterEach } from 'vitest';
 
 // Provide the API key the module reads at import time
 vi.stubEnv('VITE_GOOGLE_MAPS_API_KEY', 'test-key');

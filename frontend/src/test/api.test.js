@@ -5,7 +5,7 @@
 // Uses vi.spyOn to intercept fetch without network calls.
 // =============================================================================
 
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, vi, afterEach } from 'vitest';
 
 // Mock Firebase auth before importing api.js
 vi.mock('../services/firebase/config', () => ({

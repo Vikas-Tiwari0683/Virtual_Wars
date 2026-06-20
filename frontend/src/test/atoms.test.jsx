@@ -4,7 +4,6 @@
 // =============================================================================
 
 import { describe, it, expect, vi } from 'vitest';
-import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import Badge from '../components/atoms/Badge';
 import Button from '../components/atoms/Button';

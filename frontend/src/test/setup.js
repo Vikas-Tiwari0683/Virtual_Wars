@@ -11,7 +11,7 @@ import React from 'react';
 // React 19 uses the new automatic JSX transform but Vitest's jsdom
 // environment needs React in scope. Inject it globally so all component
 // files resolve JSX without needing explicit imports.
-global.React = React;
+globalThis.React = React;
 
 // Mock MaterialIcon globally — leaf UI component, not under test
 vi.mock('../components/atoms/MaterialIcon', () => ({
