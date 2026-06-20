@@ -12,6 +12,7 @@ import Button         from '../components/atoms/Button';
 import Badge          from '../components/atoms/Badge';
 import { activitiesAPI } from '../services/api';
 import { autocomplete, getRouteDistance } from '../services/mapsService';
+import { parseActivitiesCsv } from '../utils/csv';
 
 // =============================================================================
 // SECTION: Emission data
@@ -409,40 +410,20 @@ export default function LogActivityPage() {
 
     setImporting(true);
     const text = await file.text();
-    const lines = text.trim().split('\n');
-    const headers = lines[0].split(',').map((h) => h.trim().toLowerCase());
 
-    const required = ['category', 'subtype', 'quantity', 'unit', 'carbon_kg'];
-    const missingHeaders = required.filter((r) => !headers.includes(r));
-    if (missingHeaders.length) {
-      showToast(`Error: CSV missing columns: ${missingHeaders.join(', ')}`);
+    const { rows, skipped, error } = parseActivitiesCsv(text);
+    if (error) {
+      showToast(`Error: ${error}`);
       setImporting(false);
       return;
     }
 
     let imported = 0;
-    let failed   = 0;
+    let failed   = skipped;
 
-    for (let i = 1; i < lines.length; i++) {
-      const cols = lines[i].split(',').map((c) => c.trim());
-      const row  = Object.fromEntries(headers.map((h, idx) => [h, cols[idx] ?? '']));
-
-      if (!row.category || !row.subtype || !row.quantity || !row.unit) {
-        failed++;
-        continue;
-      }
-
-      const { data, error } = await activitiesAPI.create({
-        category:    row.category.toLowerCase(),
-        subtype:     row.subtype.toLowerCase(),
-        quantity:    parseFloat(row.quantity) || 0,
-        unit:        row.unit,
-        carbon_kg:   parseFloat(row.carbon_kg) || 0,
-        notes:       row.notes || '',
-        logged_date: row.logged_date || new Date().toISOString().split('T')[0],
-      });
-
-      if (error) { failed++; }
+    for (const activity of rows) {
+      const { data, error: apiErr } = await activitiesAPI.create(activity);
+      if (apiErr) { failed++; }
       else { setLogged((prev) => [data, ...prev]); imported++; }
     }
 

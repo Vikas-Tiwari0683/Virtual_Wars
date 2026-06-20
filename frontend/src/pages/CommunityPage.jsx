@@ -62,11 +62,11 @@ function UserChallengeHero({ challenges }) {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 z-10 relative">
         <div>
           <div className="flex items-center gap-2 mb-2">
-            <span className="text-2xl">🏆</span>
+            <span className="text-2xl" aria-hidden="true">🏆</span>
             <p className="text-sm font-bold opacity-80 uppercase tracking-widest">{joined.title}</p>
           </div>
           <h2 className="text-3xl font-bold mb-1">You're participating!</h2>
-          <p className="text-white/80 text-sm">{joined.participant_count || 0} participants · {daysLeft} days left</p>
+          <p className="text-white/90 text-sm">{joined.participant_count || 0} participants · {daysLeft} days left</p>
         </div>
         <div className="flex flex-col items-start md:items-end gap-2 flex-shrink-0">
           <p className="text-[11px] font-bold uppercase opacity-60">Your Score</p>
@@ -109,11 +109,11 @@ function ChallengeCard({ challenge, idx, onJoined }) {
         </Badge>
       )}
       <h3 className="text-lg font-bold mb-2">{challenge.title}</h3>
-      <p className="text-sm text-white/80 mb-4 leading-snug">{challenge.description}</p>
-      <div className="flex items-center gap-4 text-[11px] font-bold mb-4 opacity-80 flex-wrap">
-        <span>👥 {(challenge.participant_count || 0).toLocaleString()}</span>
-        <span>⏱ {daysLeft}d left</span>
-        {challenge.avg_score_kg && <span>🌱 Avg {parseFloat(challenge.avg_score_kg).toFixed(1)} kg</span>}
+      <p className="text-sm text-white/90 mb-4 leading-snug">{challenge.description}</p>
+      <div className="flex items-center gap-4 text-[11px] font-bold mb-4 opacity-90 flex-wrap">
+        <span><span aria-hidden="true">👥</span> {(challenge.participant_count || 0).toLocaleString()}</span>
+        <span><span aria-hidden="true">⏱</span> {daysLeft}d left</span>
+        {challenge.avg_score_kg && <span><span aria-hidden="true">🌱</span> Avg {parseFloat(challenge.avg_score_kg).toFixed(1)} kg</span>}
       </div>
       {error && <p className="text-xs text-[#ffdad6] mb-2">{error}</p>}
       {!challenge.joined && (
@@ -204,7 +204,7 @@ function Leaderboard({ challenges }) {
                       {entry.first_name?.[0]?.toUpperCase() || '?'}
                     </div>
                     <div className={`${bgCols[i]} rounded-t-xl w-16 ${heights[i]} flex flex-col items-center justify-center`}>
-                      <span className="text-xl">{medals[i]}</span>
+                      <span className="text-xl" aria-hidden="true">{medals[i]}</span>
                       <p className="text-[10px] font-bold text-[#141b2b]">{parseFloat(entry.score_kg).toFixed(0)}</p>
                     </div>
                     <p className="text-[11px] font-semibold text-[#3e4a3d] mt-1 max-w-[64px] text-center leading-tight">{entry.first_name}</p>

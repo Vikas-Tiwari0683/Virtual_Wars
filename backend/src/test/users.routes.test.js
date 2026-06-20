@@ -138,12 +138,25 @@ describe('Users Routes', () => {
 
   // --------------------------------------------------------------------------
   describe('DELETE /api/users/account', () => {
-    it('deletes account and returns 200', async () => {
+    it('deletes account and returns 200 with confirmation', async () => {
       mockAuth(1);
       pool.query.mockResolvedValueOnce({ rowCount: 1 });
-      const res = await request(app).delete('/api/users/account').set(AUTH);
+      const res = await request(app)
+        .delete('/api/users/account')
+        .set(AUTH)
+        .send({ confirmText: 'DELETE' });
       expect(res.status).toBe(200);
       expect(res.body.message).toMatch(/deleted/i);
+    });
+
+    it('returns 400 when confirmation text is missing', async () => {
+      mockAuth(1);
+      const res = await request(app)
+        .delete('/api/users/account')
+        .set(AUTH)
+        .send({});
+      expect(res.status).toBe(400);
+      expect(res.body.error).toMatch(/confirmation/i);
     });
 
     it('returns 401 without auth', async () => {

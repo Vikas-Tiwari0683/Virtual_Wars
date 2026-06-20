@@ -14,18 +14,34 @@
 
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
-import { useEffect, useRef }     from 'react';
-import LandingPage    from './pages/LandingPage';
-import LoginPage      from './pages/LoginPage';
-import OnboardingPage from './pages/OnboardingPage';
-import DashboardPage  from './pages/DashboardPage';
-import LogActivityPage from './pages/LogActivityPage';
-import InsightsPage   from './pages/InsightsPage';
-import GoalsPage      from './pages/GoalsPage';
-import CommunityPage  from './pages/CommunityPage';
-import LearnPage      from './pages/LearnPage';
-import SettingsPage   from './pages/SettingsPage';
+import { useEffect, useRef, lazy, Suspense } from 'react';
 import { ROUTES }     from './utils/constants';
+
+// =============================================================================
+// SECTION: Lazy-loaded route components
+// Each page is split into its own chunk so the initial bundle only loads the
+// landing/login code. Dashboard pages download on demand when navigated to.
+// =============================================================================
+const LandingPage     = lazy(() => import('./pages/LandingPage'));
+const LoginPage       = lazy(() => import('./pages/LoginPage'));
+const OnboardingPage  = lazy(() => import('./pages/OnboardingPage'));
+const DashboardPage   = lazy(() => import('./pages/DashboardPage'));
+const LogActivityPage = lazy(() => import('./pages/LogActivityPage'));
+const InsightsPage    = lazy(() => import('./pages/InsightsPage'));
+const GoalsPage       = lazy(() => import('./pages/GoalsPage'));
+const CommunityPage   = lazy(() => import('./pages/CommunityPage'));
+const LearnPage       = lazy(() => import('./pages/LearnPage'));
+const SettingsPage    = lazy(() => import('./pages/SettingsPage'));
+
+// Lightweight fallback shown while a route chunk downloads
+function RouteFallback() {
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-[#f9f9ff]" role="status" aria-live="polite">
+      <div className="w-10 h-10 border-4 border-[#bdcaba] border-t-[#006b2c] rounded-full animate-spin" />
+      <span className="sr-only">Loading page…</span>
+    </div>
+  );
+}
 
 // =============================================================================
 // SECTION: RouteAnnouncer
@@ -61,6 +77,14 @@ function RouteAnnouncer() {
           regionRef.current.textContent = `Navigated to ${getPageName(location.pathname)}`;
         }
       }, 100);
+    }
+
+    // Focus management: move keyboard focus to the main content region on
+    // every route change so screen-reader / keyboard users land on the new
+    // page instead of staying on a stale element.
+    const main = document.getElementById('main-content');
+    if (main) {
+      main.focus({ preventScroll: false });
     }
   }, [location.pathname]);
 
@@ -101,28 +125,30 @@ function AppRoutes() {
   return (
     <>
       <RouteAnnouncer />
-      <Routes>
-        {/* --- Public --- */}
-        <Route path={ROUTES.HOME}       element={<LandingPage />} />
-        <Route path={ROUTES.LOGIN}      element={<LoginPage />} />
+      <Suspense fallback={<RouteFallback />}>
+        <Routes>
+          {/* --- Public --- */}
+          <Route path={ROUTES.HOME}       element={<LandingPage />} />
+          <Route path={ROUTES.LOGIN}      element={<LoginPage />} />
 
-        {/* --- Needs auth only --- */}
-        <Route path={ROUTES.ONBOARDING} element={
-          <ProtectedRoute><OnboardingPage /></ProtectedRoute>
-        } />
+          {/* --- Needs auth only --- */}
+          <Route path={ROUTES.ONBOARDING} element={
+            <ProtectedRoute><OnboardingPage /></ProtectedRoute>
+          } />
 
-        {/* --- Needs auth + onboarded --- */}
-        <Route path={ROUTES.DASHBOARD}  element={<P><DashboardPage /></P>} />
-        <Route path={ROUTES.LOG}        element={<P><LogActivityPage /></P>} />
-        <Route path={ROUTES.INSIGHTS}   element={<P><InsightsPage /></P>} />
-        <Route path={ROUTES.GOALS}      element={<P><GoalsPage /></P>} />
-        <Route path={ROUTES.COMMUNITY}  element={<P><CommunityPage /></P>} />
-        <Route path={ROUTES.LEARN}      element={<P><LearnPage /></P>} />
-        <Route path={ROUTES.SETTINGS}   element={<P><SettingsPage /></P>} />
+          {/* --- Needs auth + onboarded --- */}
+          <Route path={ROUTES.DASHBOARD}  element={<P><DashboardPage /></P>} />
+          <Route path={ROUTES.LOG}        element={<P><LogActivityPage /></P>} />
+          <Route path={ROUTES.INSIGHTS}   element={<P><InsightsPage /></P>} />
+          <Route path={ROUTES.GOALS}      element={<P><GoalsPage /></P>} />
+          <Route path={ROUTES.COMMUNITY}  element={<P><CommunityPage /></P>} />
+          <Route path={ROUTES.LEARN}      element={<P><LearnPage /></P>} />
+          <Route path={ROUTES.SETTINGS}   element={<P><SettingsPage /></P>} />
 
-        {/* --- Catch-all --- */}
-        <Route path="*" element={<Navigate to={ROUTES.HOME} replace />} />
-      </Routes>
+          {/* --- Catch-all --- */}
+          <Route path="*" element={<Navigate to={ROUTES.HOME} replace />} />
+        </Routes>
+      </Suspense>
     </>
   );
 }

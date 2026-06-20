@@ -140,8 +140,15 @@ router.get('/dashboard', async (req, res, next) => {
 // =============================================================================
 // DELETE /api/users/account
 // Permanently deletes the user and all associated data (CASCADE).
+// Requires an explicit confirmation token in the body to prevent accidental
+// or CSRF-triggered deletion: { confirmText: "DELETE" }.
 // =============================================================================
 router.delete('/account', async (req, res, next) => {
+  if (req.body?.confirmText !== 'DELETE') {
+    return res.status(400).json({
+      error: 'Account deletion requires confirmation. Send { "confirmText": "DELETE" }.',
+    });
+  }
   try {
     await pool.query('DELETE FROM users WHERE id = $1', [req.user.id]);
     res.json({ message: 'Account deleted.' });

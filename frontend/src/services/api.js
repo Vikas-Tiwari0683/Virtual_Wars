@@ -61,7 +61,7 @@ const get    = (path, signal)        => request('GET',    path, null,  signal);
 const post   = (path, body)          => request('POST',   path, body);
 const patch  = (path, body)          => request('PATCH',  path, body);
 const put    = (path, body)          => request('PUT',    path, body);
-const del    = (path)                => request('DELETE', path);
+const del    = (path, body)          => request('DELETE', path, body);
 // =============================================================================
 // SECTION: Auth API
 // login/register are handled by Firebase Auth — these endpoints handle
@@ -160,6 +160,6 @@ export const usersAPI = {
   /** All dashboard aggregates in one request. */
   dashboard: () => get('/users/dashboard'),
 
-  /** Permanently delete the account. */
-  deleteAccount: () => del('/users/account'),
+  /** Permanently delete the account. Requires explicit confirmation. */
+  deleteAccount: () => del('/users/account', { confirmText: 'DELETE' }),
 };
